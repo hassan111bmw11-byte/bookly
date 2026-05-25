@@ -12,7 +12,6 @@ import {
   Zap, Sparkles, BadgeCheck, ListVideo, LineChart,
   type LucideIcon
 } from "lucide-react";
-
 const TEACHER_EMAIL = "ahmad10@gmail.com";
 const TEACHER_PASSWORD = "123456"; // Demo only. In real apps: server auth + hashed password.
 const CASH_PHONE = "01097242107";
