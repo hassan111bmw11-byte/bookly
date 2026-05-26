@@ -27,11 +27,16 @@ export async function POST(request: Request) {
     const { name, email, phone, guardianPhone, password } = body;
 
     if (!name || !email || !phone || !password) {
-      return NextResponse.json({ error: "جميع الحقول مطلوبة." }, { status: 400 });
+      return NextResponse.json(
+        { error: "جميع الحقول مطلوبة." },
+        { status: 400 },
+      );
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    const existing = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
     if (existing) {
       return NextResponse.json(
         { error: "البريد الإلكتروني مستخدم بالفعل." },
@@ -85,7 +90,9 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    console.error("[auth/register]", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[auth/register] Error:", errorMessage);
+    console.error("[auth/register] Full error:", error);
     return NextResponse.json(
       { error: "حدث خطأ داخلي. حاول مرة أخرى لاحقاً." },
       { status: 500 },
