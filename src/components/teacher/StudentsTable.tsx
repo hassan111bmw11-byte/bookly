@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { ChangeEvent } from "react";
 import Card from "@/components/ui/Card";
 import SearchInput from "@/components/ui/SearchInput";
 
@@ -16,6 +17,7 @@ export default function StudentsTable() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchStudents() {
@@ -55,7 +57,9 @@ export default function StudentsTable() {
         <SearchInput
           placeholder="بحث بالاسم أو الهاتف..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setSearch(e.target.value)
+          }
         />
       </div>
 
@@ -71,6 +75,7 @@ export default function StudentsTable() {
                 <th className="p-3">الهاتف</th>
                 <th className="p-3">البريد الإلكتروني</th>
                 <th className="p-3">رصيد المحفظة</th>
+                <th className="p-3">إجراءات</th>
               </tr>
             </thead>
             <tbody>
@@ -80,9 +85,42 @@ export default function StudentsTable() {
                   <td className="p-3">{student.phoneNumber}</td>
                   <td className="p-3">{student.email}</td>
                   <td className="p-3">{student.walletBalance} ج</td>
-                  <button
-                  onClick={async () => {await fetch(`/api/delete/${student.id}`)}}
-                   className="text-red-700 rounded border border-red-700 mt-2 px-3 py-1">حذف</button>
+                  <td className="p-3 text-left">
+                    <button
+                      className="text-rose-600 hover:underline"
+                      disabled={deletingId === student.id}
+                      onClick={async () => {
+                        const ok = confirm(
+                          `هل تريد حذف الطالب ${student.name}؟`,
+                        );
+                        if (!ok) return;
+                        try {
+                          setDeletingId(student.id);
+                          const res = await fetch(
+                            `/api/teacher/students/${student.id}`,
+                            {
+                              method: "DELETE",
+                            },
+                          );
+                          const data = await res.json();
+                          if (!res.ok) {
+                            alert(data.error || "فشل الحذف");
+                          } else {
+                            setStudents((s) =>
+                              s.filter((st) => st.id !== student.id),
+                            );
+                          }
+                        } catch (err) {
+                          console.error(err);
+                          alert("حدث خطأ أثناء الحذف");
+                        } finally {
+                          setDeletingId(null);
+                        }
+                      }}
+                    >
+                      {deletingId === student.id ? "جارٍ الحذف..." : "حذف"}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

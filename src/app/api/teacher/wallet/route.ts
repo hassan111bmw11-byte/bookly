@@ -31,12 +31,17 @@ export async function GET() {
 
     const students = await prisma.user.findMany({
       where: { role: "STUDENT" },
-      include: { walletTransactions: true },
+      select: {
+        id: true,
+        name: true,
+        phoneNumber: true,
+        walletTransactions: true,
+      },
       orderBy: { createdAt: "desc" },
     });
 
     const mapped = students.map((s) => {
-      const balance = (s.walletTransactions || []).reduce(
+      const balance = s.walletTransactions.reduce(
         (acc: number, t: any) =>
           acc + (t.type === "CREDIT" ? t.amount : -t.amount),
         0,
@@ -44,16 +49,14 @@ export async function GET() {
       return {
         id: s.id,
         name: s.name,
-        email: s.email,
         phoneNumber: s.phoneNumber,
-        createdAt: s.createdAt,
         walletBalance: balance,
       };
     });
 
     return NextResponse.json({ students: mapped }, { status: 200 });
   } catch (error) {
-    console.error("[teacher/students]", error);
+    console.error("[teacher/wallet]", error);
     return NextResponse.json({ error: "حدث خطأ داخلي" }, { status: 500 });
   }
 }

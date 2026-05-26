@@ -25,35 +25,26 @@ async function getUserFromCookie() {
 export async function GET() {
   try {
     const user = await getUserFromCookie();
-    if (!user || user.role !== "TEACHER") {
+    if (!user || user.role !== "STUDENT") {
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
-    const students = await prisma.user.findMany({
-      where: { role: "STUDENT" },
-      include: { walletTransactions: true },
+    const wallet = await prisma.walletTransaction.findMany({
+      where: { userId: user.id },
       orderBy: { createdAt: "desc" },
     });
 
-    const mapped = students.map((s) => {
-      const balance = (s.walletTransactions || []).reduce(
-        (acc: number, t: any) =>
-          acc + (t.type === "CREDIT" ? t.amount : -t.amount),
-        0,
-      );
-      return {
-        id: s.id,
-        name: s.name,
-        email: s.email,
-        phoneNumber: s.phoneNumber,
-        createdAt: s.createdAt,
-        walletBalance: balance,
-      };
-    });
+    const balance = wallet.reduce(
+      (acc, t) => acc + (t.type === "CREDIT" ? t.amount : -t.amount),
+      0,
+    );
 
-    return NextResponse.json({ students: mapped }, { status: 200 });
+    return NextResponse.json(
+      { balance, transactions: wallet },
+      { status: 200 },
+    );
   } catch (error) {
-    console.error("[teacher/students]", error);
+    console.error("[student/wallet]", error);
     return NextResponse.json({ error: "حدث خطأ داخلي" }, { status: 500 });
   }
 }
