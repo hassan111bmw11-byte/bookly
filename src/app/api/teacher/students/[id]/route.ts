@@ -24,7 +24,9 @@ async function getUserFromCookie() {
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } },
+  {
+    params,
+  }: { params: Record<string, string> | Promise<Record<string, string>> },
 ) {
   try {
     const user = await getUserFromCookie();
@@ -32,7 +34,8 @@ export async function DELETE(
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
-    const studentId = parseInt(params.id, 10);
+    const resolvedParams = await params;
+    const studentId = parseInt(resolvedParams.id, 10);
     if (Number.isNaN(studentId)) {
       return NextResponse.json(
         { error: "معرّف الطالب غير صالح" },
