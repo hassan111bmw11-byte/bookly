@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+}
+
+enum AssignmentStatus {
+  PENDING
+  SUBMITTED
+  GRADED
+}
+
+enum ExamType {
+  QUIZ
+  MIDTERM
+  FINAL
+}
+
+enum FileType {
+  DOCUMENT
+  VIDEO
+  OTHER
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  name              String
+  email             String    @unique
+  phoneNumber       String
+  parentPhoneNumber String?
+  password          String
+  role              Role      @default(STUDENT)
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  sessions          Session[]
+  assignments       Assignment[]
+  lectures          Lecture[]
+  exams             Exam[]
+  files             FileResource[]
+  chargeCodes       ChargeCode[]
+  walletTransactions WalletTransaction[]
+  courses           Course[]
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Course {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  teacher     User      @relation(fields: [teacherId], references: [id])
+  teacherId   Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  lectures    Lecture[]
+  assignments Assignment[]
+  exams       Exam[]
+  files       FileResource[]
+}
+
+model Lecture {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  videoUrl    String
+  teacher     User      @relation(fields: [teacherId], references: [id])
+  teacherId   Int
+  course      Course?   @relation(fields: [courseId], references: [id])
+  courseId    Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Assignment {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String
+  dueDate     DateTime
+  status      AssignmentStatus @default(PENDING)
+  teacher     User             @relation(fields: [teacherId], references: [id])
+  teacherId   Int
+  course      Course?          @relation(fields: [courseId], references: [id])
+  courseId    Int?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Exam {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  date        DateTime
+  type        ExamType @default(QUIZ)
+  teacher     User     @relation(fields: [teacherId], references: [id])
+  teacherId   Int
+  course      Course?  @relation(fields: [courseId], references: [id])
+  courseId    Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FileResource {
+  id          Int      @id @default(autoincrement())
+  title       String
+  url         String
+  type        FileType @default(DOCUMENT)
+  teacher     User     @relation(fields: [teacherId], references: [id])
+  teacherId   Int
+  course      Course?  @relation(fields: [courseId], references: [id])
+  courseId    Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ChargeCode {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  amount      Int
+  expiresAt   DateTime
+  teacher     User     @relation(fields: [teacherId], references: [id])
+  teacherId   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model WalletTransaction {
+  id          Int             @id @default(autoincrement())
+  user        User            @relation(fields: [userId], references: [id])
+  userId      Int
+  amount      Int
+  type        TransactionType
+  description String?
+  createdAt   DateTime        @default(now())
+}
