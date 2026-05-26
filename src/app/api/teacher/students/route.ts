@@ -35,9 +35,9 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    const mapped = students.map((s) => {
+    const mapped = students.map((s: (typeof students)[0]) => {
       const balance = (s.walletTransactions || []).reduce(
-        (acc: number, t: any) =>
+        (acc: number, t: (typeof s.walletTransactions)[0]) =>
           acc + (t.type === "CREDIT" ? t.amount : -t.amount),
         0,
       );

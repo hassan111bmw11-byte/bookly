@@ -35,7 +35,8 @@ export async function GET() {
     });
 
     const balance = wallet.reduce(
-      (acc, t) => acc + (t.type === "CREDIT" ? t.amount : -t.amount),
+      (acc: number, t: (typeof wallet)[0]) =>
+        acc + (t.type === "CREDIT" ? t.amount : -t.amount),
       0,
     );
 

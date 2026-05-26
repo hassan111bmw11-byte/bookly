@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import { handleFileUpload } from "@/lib/file-upload";
+import type { FileType } from "@prisma/client";
 
 async function getUserFromCookie() {
   const cookiesStore = await cookies();
@@ -61,11 +62,15 @@ export async function POST(request: Request) {
 
     const url = await handleFileUpload(formData, "files");
 
+    const validTypes: FileType[] = ["DOCUMENT", "VIDEO", "OTHER"];
+    const fileType = (
+      validTypes.includes(type as FileType) ? type : "DOCUMENT") as FileType;
+
     const file = await prisma.fileResource.create({
       data: {
         title,
         url,
-        type: type || "DOCUMENT",
+        type: fileType,
         teacherId: user.id,
         courseId: courseId ? parseInt(courseId) : null,
       },
