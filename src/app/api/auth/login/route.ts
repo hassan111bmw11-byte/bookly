@@ -81,7 +81,9 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    console.error("[auth/login]", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[auth/login] Error:", errorMessage);
+    console.error("[auth/login] Full error:", error);
     return NextResponse.json(
       { error: "حدث خطأ داخلي. حاول مرة أخرى لاحقاً." },
       { status: 500 },
