@@ -2,7 +2,15 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+export const runtime = "nodejs";
+
 export async function GET() {
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json(
+      { error: "خادم قاعدة البيانات غير مهيأ." },
+      { status: 500 },
+    );
+  }
   try {
     const cookiesStore = await cookies();
     const sessionToken = cookiesStore.get("sessionToken")?.value;
