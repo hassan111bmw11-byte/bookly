@@ -43,6 +43,7 @@ export default function RegisterPage() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ name, email, phone, guardianPhone, password }),
     });
 
@@ -79,9 +80,9 @@ export default function RegisterPage() {
           {loading ? "جاري إنشاء الحساب..." : "إنشاء الحساب"}
         </Button>
 
-        {error ? (
+        {error ?
           <p className="text-center text-sm text-red-500">{error}</p>
-        ) : null}
+        : null}
 
         <p className="text-center text-sm text-slate-500">
           عندك حساب بالفعل؟{" "}
