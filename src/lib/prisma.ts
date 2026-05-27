@@ -3,12 +3,17 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-export const prisma =
+const connectionString = process.env.DATABASE_URL;
+
+// Only attach the PrismaPg adapter when a connection string is available.
+// The adapter constructor can throw if the connection string is missing or invalid,
+// which would cause imports to fail at runtime (e.g. during deployments).
+const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
-    adapter: new PrismaPg({
-      connectionString: process.env.DATABASE_URL!,
-    }),
+    ...(connectionString ?
+      { adapter: new PrismaPg({ connectionString }) }
+    : {}),
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
 

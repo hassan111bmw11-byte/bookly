@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 import prisma from "@/lib/prisma";
 
+export const runtime = "nodejs";
+
 type RegisterRequestBody = {
   name?: string;
   email?: string;
@@ -12,6 +14,12 @@ type RegisterRequestBody = {
 };
 
 export async function POST(request: Request) {
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json(
+      { error: "خادم قاعدة البيانات غير مهيأ." },
+      { status: 500 },
+    );
+  }
   try {
     let body: RegisterRequestBody = {};
 

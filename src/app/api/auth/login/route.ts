@@ -3,12 +3,20 @@ import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 import prisma from "@/lib/prisma";
 
+export const runtime = "nodejs";
+
 type LoginRequestBody = {
   email?: string;
   password?: string;
 };
 
 export async function POST(request: Request) {
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json(
+      { error: "خادم قاعدة البيانات غير مهيأ." },
+      { status: 500 },
+    );
+  }
   try {
     let body: LoginRequestBody = {};
 
@@ -31,7 +39,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
     if (!user) {
       return NextResponse.json(
         { error: "بيانات الدخول غير صحيحة." },
@@ -39,13 +49,13 @@ export async function POST(request: Request) {
       );
     }
 
-  const isValid = await bcrypt.compare(password, user.password);
-  if (!isValid) {
-    return NextResponse.json(
-      { error: "بيانات الدخول غير صحيحة." },
-      { status: 401 },
-    );
-  }
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return NextResponse.json(
+        { error: "بيانات الدخول غير صحيحة." },
+        { status: 401 },
+      );
+    }
 
     const token = randomUUID();
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
