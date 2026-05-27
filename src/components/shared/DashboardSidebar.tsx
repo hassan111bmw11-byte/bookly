@@ -19,10 +19,10 @@ function DashboardSidebar({ role }: Props) {
   }, [role]);
 
   return (
-    <aside className="fixed bottom-0 right-0 top-0 hidden w-72 border-l border-white/10 bg-[#090b18] p-4 lg:block">
+    <aside className="fixed bottom-0 right-0 top-0 hidden h-screen w-72 border-l border-white/10 bg-[#090b18] p-4 lg:block">
       <Logo />
 
-      <nav className="mt-8 space-y-2">
+      <nav className="mt-8 space-y-2 overflow-y-auto">
         {items.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
 
@@ -33,9 +33,9 @@ function DashboardSidebar({ role }: Props) {
               prefetch={false}
               className={cn(
                 "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition",
-                active
-                  ? "bg-gradient-to-l from-cyan-400 to-indigo-500 text-white"
-                  : "text-slate-300 hover:bg-white/10"
+                active ?
+                  "bg-gradient-to-l from-cyan-400 to-indigo-500 text-white"
+                : "text-slate-300 hover:bg-white/10",
               )}
             >
               <Icon size={18} />
