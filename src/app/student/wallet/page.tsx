@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/shared/DashboardLayout";
 import PageTitle from "@/components/shared/PageTitle";
 import Card from "@/components/ui/Card";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import { useToast } from "@/components/shared/ToastProvider";
 import { Wallet } from "lucide-react";
 import { studentNavItems } from "@/data/platform";
 
@@ -18,7 +21,10 @@ type WalletTransaction = {
 export default function Page() {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [redemptionCode, setRedemptionCode] = useState("");
   const [loading, setLoading] = useState(true);
+  const [redeemLoading, setRedeemLoading] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     async function fetchWallet() {
@@ -39,6 +45,40 @@ export default function Page() {
     fetchWallet();
   }, []);
 
+  const handleRedeem = async () => {
+    if (!redemptionCode.trim()) {
+      toast.show("أدخل كود الشحن", "error");
+      return;
+    }
+
+    setRedeemLoading(true);
+    try {
+      const response = await fetch("/api/student/redeem-charge-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: redemptionCode.trim() }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.show(data?.error || "فشل تفعيل الكود.", "error");
+        return;
+      }
+      toast.show("تم تفعيل الكود بنجاح", "success");
+      setRedemptionCode("");
+      const walletResponse = await fetch("/api/student/wallet");
+      const walletData = await walletResponse.json();
+      if (walletResponse.ok) {
+        setBalance(walletData.balance);
+        setTransactions(walletData.transactions);
+      }
+    } catch (error) {
+      console.error("Failed to redeem code:", error);
+      toast.show("فشل تفعيل الكود.", "error");
+    } finally {
+      setRedeemLoading(false);
+    }
+  };
+
   return (
     <DashboardLayout title="لوحة الطالب" items={studentNavItems}>
       <PageTitle title="المحفظة" />
@@ -53,6 +93,21 @@ export default function Page() {
               <Wallet size={20} />
               محافظي
             </div>
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="text-xl font-black">تفعيل كود الشحن</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto]">
+            <Input
+              label="أدخل الكود"
+              value={redemptionCode}
+              onChange={(e) => setRedemptionCode(e.target.value)}
+              placeholder="كود الشحن هنا"
+            />
+            <Button onClick={handleRedeem} disabled={redeemLoading}>
+              {redeemLoading ? "جاري التفعيل..." : "تفعيل الكود"}
+            </Button>
           </div>
         </Card>
 

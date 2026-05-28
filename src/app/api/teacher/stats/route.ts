@@ -45,6 +45,22 @@ export async function GET() {
       where: { role: "STUDENT" },
     });
 
+    const totalCodes = await prisma.chargeCode.count({
+      where: { teacherId: user.id },
+    });
+
+    const unusedCodes = await prisma.chargeCode.count({
+      where: { teacherId: user.id, status: "ACTIVE" },
+    });
+
+    const usedCodes = await prisma.chargeCode.count({
+      where: { teacherId: user.id, status: "USED" },
+    });
+
+    const canceledCodes = await prisma.chargeCode.count({
+      where: { teacherId: user.id, status: "CANCELED" },
+    });
+
     return NextResponse.json(
       {
         stats: {
@@ -52,7 +68,10 @@ export async function GET() {
           assignments: assignmentsCount,
           exams: examsCount,
           students: studentsCount,
-          activeCodes: 20,
+          totalCodes,
+          unusedCodes,
+          usedCodes,
+          canceledCodes,
         },
       },
       { status: 200 },

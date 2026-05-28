@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/components/shared/ToastProvider";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AuthShell from "@/components/auth/AuthShell";
@@ -9,6 +10,7 @@ import Input from "@/components/ui/Input";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const toast = useToast();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -51,12 +53,57 @@ export default function RegisterPage() {
     setLoading(false);
 
     if (!res.ok) {
-      setError(data?.error || "حدث خطأ أثناء التسجيل.");
+      const msg = data?.error || "حدث خطأ أثناء التسجيل.";
+      setError(msg);
+      toast.show(msg, "error");
       return;
     }
 
-    router.push("/student/dashboard");
+    // save email so user doesn't retype next time
+    try {
+      localStorage.setItem("signup_email", email);
+    } catch {}
+
+    toast.show("تم إنشاء الحساب بنجاح", "success");
+    router.replace("/student/dashboard");
   };
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("signup_email");
+      if (saved) {
+        const el = document.querySelector(
+          'input[name="email"]',
+        ) as HTMLInputElement | null;
+        if (el) el.value = saved;
+      }
+    } catch {}
+  }, []);
+
+  // Redirect away from register if already authenticated
+  useEffect(() => {
+    let mounted = true;
+    async function check() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (!mounted) return;
+        const data = await res.json();
+        if (res.ok && data?.user) {
+          router.replace(
+            data.user.role === "TEACHER" ?
+              "/teacher/dashboard"
+            : "/student/dashboard",
+          );
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    check();
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
 
   return (
     <AuthShell

@@ -11,7 +11,10 @@ type Stats = {
   assignments: number;
   exams: number;
   students: number;
-  activeCodes: number;
+  totalCodes: number;
+  unusedCodes: number;
+  usedCodes: number;
+  canceledCodes: number;
 };
 
 export default function TeacherDashboard() {
@@ -40,28 +43,28 @@ export default function TeacherDashboard() {
     stats ?
       [
         {
-          label: "الطلاب",
-          value: stats.students.toString(),
-          icon: Users,
-          color: "from-blue-500 to-cyan-400",
-        },
-        {
-          label: "المحاضرات",
-          value: stats.lectures.toString(),
-          icon: Video,
-          color: "from-purple-500 to-fuchsia-500",
-        },
-        {
-          label: "الاختبارات",
-          value: stats.exams.toString(),
-          icon: ClipboardCheck,
-          color: "from-rose-500 to-pink-500",
-        },
-        {
-          label: "أكواد نشطة",
-          value: stats.activeCodes.toString(),
+          label: "مجموع الأكواد",
+          value: stats.totalCodes.toString(),
           icon: Ticket,
-          color: "from-orange-500 to-amber-400",
+          color: "from-violet-500 to-indigo-500",
+        },
+        {
+          label: "غير مستخدمة",
+          value: stats.unusedCodes.toString(),
+          icon: Ticket,
+          color: "from-emerald-500 to-teal-400",
+        },
+        {
+          label: "مستخدمة",
+          value: stats.usedCodes.toString(),
+          icon: Ticket,
+          color: "from-cyan-500 to-blue-500",
+        },
+        {
+          label: "ملغاة",
+          value: stats.canceledCodes.toString(),
+          icon: Ticket,
+          color: "from-rose-500 to-red-500",
         },
       ]
     : [];

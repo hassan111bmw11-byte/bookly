@@ -34,6 +34,12 @@ enum TransactionType {
   DEBIT
 }
 
+enum ChargeCodeStatus {
+  ACTIVE
+  USED
+  CANCELED
+}
+
 model User {
   id                Int       @id @default(autoincrement())
   name              String
@@ -44,7 +50,7 @@ model User {
   role              Role      @default(STUDENT)
   isActive          Boolean   @default(true)
   createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  updatedAt         DateTime @updatedAt
 
   sessions          Session[]
   assignments       Assignment[]
@@ -53,6 +59,7 @@ model User {
   files             FileResource[]
   chargeCodes       ChargeCode[]
   walletTransactions WalletTransaction[]
+  chargeCodeUsages   ChargeCodeUsage[]
   courses           Course[]
 }
 
@@ -136,14 +143,26 @@ model FileResource {
 }
 
 model ChargeCode {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
+  id          Int              @id @default(autoincrement())
+  code        String           @unique
   amount      Int
   expiresAt   DateTime
-  teacher     User     @relation(fields: [teacherId], references: [id])
+  status      ChargeCodeStatus @default(ACTIVE)
+  teacher     User             @relation(fields: [teacherId], references: [id])
   teacherId   Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  usage       ChargeCodeUsage?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model ChargeCodeUsage {
+  id           Int        @id @default(autoincrement())
+  chargeCode   ChargeCode @relation(fields: [chargeCodeId], references: [id])
+  chargeCodeId Int        @unique
+  user         User       @relation(fields: [userId], references: [id])
+  userId       Int
+  amount       Int
+  usedAt       DateTime   @default(now())
 }
 
 model WalletTransaction {

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/components/shared/ToastProvider";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AuthShell from "@/components/auth/AuthShell";
@@ -8,6 +9,7 @@ import Input from "@/components/ui/Input";
 
 export default function LoginPage() {
   const router = useRouter();
+  const toast = useToast();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -38,6 +40,8 @@ export default function LoginPage() {
 
     const res = await fetch("/api/auth/login", {
       method: "POST",
+      mode: "same-origin",
+      cache: "no-store",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ email, password }),
@@ -47,21 +51,62 @@ export default function LoginPage() {
     setLoading(false);
 
     if (!res.ok) {
-      setError(data?.error || "خطأ في بيانات الدخول.");
+      const msg = data?.error || "خطأ في بيانات الدخول.";
+      setError(msg);
+      toast.show(msg, "error");
       return;
     }
 
     if (!data?.user) {
-      setError("حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.");
+      const msg = "حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.";
+      setError(msg);
+      toast.show(msg, "error");
       return;
     }
 
-    router.push(
-      data.user.role === "TEACHER"
-        ? "/teacher/dashboard"
-        : "/student/dashboard",
-    );
+    const target =
+      data.user.role === "TEACHER" ?
+        "/teacher/dashboard"
+      : "/student/dashboard";
+    window.location.replace(target);
   };
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("signup_email");
+      if (saved) {
+        const el = document.querySelector(
+          'input[name="email"]',
+        ) as HTMLInputElement | null;
+        if (el) el.value = saved;
+      }
+    } catch {}
+  }, []);
+
+  // Redirect away from login if already authenticated
+  useEffect(() => {
+    let mounted = true;
+    async function check() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (!mounted) return;
+        const data = await res.json();
+        if (res.ok && data?.user) {
+          router.replace(
+            data.user.role === "TEACHER" ?
+              "/teacher/dashboard"
+            : "/student/dashboard",
+          );
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    check();
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
 
   return (
     <AuthShell
@@ -85,9 +130,9 @@ export default function LoginPage() {
           {loading ? "جاري الدخول..." : "دخول"}
         </button>
 
-        {error ? (
+        {error ?
           <p className="text-center text-sm text-red-500">{error}</p>
-        ) : null}
+        : null}
 
         <p className="text-center text-sm text-slate-500">
           مالكش حساب؟{" "}
