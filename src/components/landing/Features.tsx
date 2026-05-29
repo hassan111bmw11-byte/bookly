@@ -27,7 +27,7 @@ const container = {
 };
 
 export default function Features() {
-  const [features, setFeatures] = useState<any[] | null>(null);
+  const [features, setFeatures] = useState<string[] | null>(null);
 
   useEffect(() => {
     let mounted = true;
