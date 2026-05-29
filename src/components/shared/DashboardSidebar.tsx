@@ -19,10 +19,10 @@ function DashboardSidebar({ role }: Props) {
   }, [role]);
 
   return (
-    <aside className="fixed bottom-0 right-0 top-0 hidden h-screen w-72 border-l border-white/10 bg-[#090b18] p-4 lg:block">
+    <aside className="fixed bottom-0 right-0 top-0 hidden h-screen w-64 border-l border-white/10 bg-[#090b18] p-4 lg:block overflow-y-auto">
       <Logo />
 
-      <nav className="mt-8 space-y-2 overflow-y-auto">
+      <nav className="mt-8 space-y-2">
         {items.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
 
