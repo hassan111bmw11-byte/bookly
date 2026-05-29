@@ -6,7 +6,7 @@ const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!url || !anonKey) {
   throw new Error(
-    "SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be defined in environment variables.",
+    "SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be defined in environment variables.",
   );
 }
 
