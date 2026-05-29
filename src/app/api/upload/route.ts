@@ -34,7 +34,9 @@ export async function POST(req: Request) {
       });
     }
 
-    const url = `${process.env.SUPABASE_URL}/storage/v1/object/public/${bucket}/${encodeURIComponent(name)}`;
+    const supabaseUrl =
+      process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const url = `${supabaseUrl}/storage/v1/object/public/${bucket}/${encodeURIComponent(name)}`;
 
     return new Response(JSON.stringify({ url }), {
       status: 200,
