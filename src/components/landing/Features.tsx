@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import FeatureCard from "./FeatureCard";
 import { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ import {
   Bot,
 } from "lucide-react";
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, LucideIcon> = {
   lectures: Video,
   exams: ClipboardCheck,
   files: FileText,
@@ -26,8 +27,14 @@ const container = {
   visible: { transition: { staggerChildren: 0.12, delayChildren: 0.12 } },
 };
 
+interface Feature {
+  key: string;
+  title: string;
+  desc: string;
+}
+
 export default function Features() {
-  const [features, setFeatures] = useState<string[] | null>(null);
+  const [features, setFeatures] = useState<Feature[] | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -66,7 +73,7 @@ export default function Features() {
           viewport={{ once: true, amount: 0.2 }}
           className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3"
         >
-          {(features || []).map((feature: any) => {
+          {(features || []).map((feature: Feature) => {
             const Icon = ICON_MAP[feature.key] || Video;
             return (
               <FeatureCard

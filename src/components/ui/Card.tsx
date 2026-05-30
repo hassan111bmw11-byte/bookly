@@ -2,14 +2,14 @@ import type { HTMLAttributes, KeyboardEvent } from "react";
 import { cn } from "@/lib/utils";
 
 export default function Card(props: HTMLAttributes<HTMLDivElement>) {
-  const { className, onClick, ...rest } = props as any;
+  const { className, onClick, ...rest } = props;
   const isClickable = typeof onClick === "function";
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (!isClickable) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      onClick?.(e as any);
+      onClick?.(e as unknown as React.MouseEvent<HTMLDivElement>);
     }
   };
 

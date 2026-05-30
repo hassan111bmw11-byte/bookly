@@ -19,6 +19,9 @@ CREATE TYPE "FileType" AS ENUM ('DOCUMENT', 'VIDEO', 'OTHER');
 -- CreateEnum
 CREATE TYPE "TransactionType" AS ENUM ('CREDIT', 'DEBIT');
 
+-- CreateEnum
+CREATE TYPE "ChargeCodeStatus" AS ENUM ('ACTIVE', 'USED', 'CANCELED');
+
 -- DropTable
 DROP TABLE "students";
 
@@ -34,6 +37,7 @@ CREATE TABLE "User" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "avatarUrl" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -126,11 +130,23 @@ CREATE TABLE "ChargeCode" (
     "code" TEXT NOT NULL,
     "amount" INTEGER NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
+    "status" "ChargeCodeStatus" NOT NULL DEFAULT 'ACTIVE',
     "teacherId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "ChargeCode_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ChargeCodeUsage" (
+    "id" SERIAL NOT NULL,
+    "chargeCodeId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "amount" INTEGER NOT NULL,
+    "usedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ChargeCodeUsage_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable

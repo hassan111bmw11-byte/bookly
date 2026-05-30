@@ -4,7 +4,7 @@ export async function GET() {
   try {
     const teacher = await prisma.user.findFirst({
       where: { role: "TEACHER" },
-      select: { id: true, name: true, avatarUrl: true },
+      select: { id: true, name: true },
       orderBy: { createdAt: "desc" },
     });
 
